@@ -3,11 +3,13 @@ class ChungToi:
         self.positions = [0] * 9
         self.orientations = [0] * 9
         self.curr_player = [1, 0]
+        self.num_moves_taken = 0
 
     def reset(self):
         self.positions = [0] * 9
         self.orientations = [0] * 9
         self.curr_player = [1, 0]
+        self.num_moves_taken = 0
 
     def get_state(self):
         return self.positions + self.orientations + self.curr_player
@@ -184,6 +186,8 @@ class ChungToi:
             self.curr_player = [1, 0]
         else:
             self.curr_player = [0, 1]
+
+        self.num_moves_taken += 1
 
     # now we have the game state made, as well as the transition dynamics
 
