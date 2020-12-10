@@ -4,6 +4,11 @@ class ChungToi:
         self.orientations = [0] * 9
         self.curr_player = [1, 0]
 
+    def reset(self):
+        self.positions = [0] * 9
+        self.orientations = [0] * 9
+        self.curr_player = [1, 0]
+
     def get_state(self):
         return self.positions + self.orientations + self.curr_player
 
