@@ -1,128 +1,216 @@
-import random
-
-
 class ChungToi:
     def __init__(self):
-        # board description (c, o) in each cell indicates orientation and color of thing in cell (-1 if player 1, 1 if player 2, 0 if no one is there)
-        self.board = [([(0, 0)] * 3) for _ in range(3)]
-        self.colors = [-1, 1]
-        # -1 means diagonally, 1 means aligned with board axes
-        self.orientations = [0, 1]
+        self.positions = [0] * 9
+        self.orientations = [0] * 9
+        self.curr_player = [1, 0]
 
-        # GAME STATE STUFF
+    def get_state(self):
+        return self.positions + self.orientations + self.curr_player
 
-        # this keeps track of the number of pieces on the board
-        # only useful in the beginning when not all pieces are in play
-        self.color_pieces_on_board = [0, 0]
+    def get_action_set(self):
+        curr_player = 1
+        if self.curr_player[1] == 1:
+            curr_player = -1
 
-        # keeps track of current player
-        self.curr_player = -1
-        self.player_positions = [[], []]
+        # if we don't have all the pieces on the board, we must put all of our pieces on board (put on empty space)
+        # every action can be encoded as (prev_pos, next_pos, orientation)
+        if self.positions.count(curr_player) < 3:
+            action_set = []
+            for i in range(9):
+                if self.positions[i] == 0:
+                    action_set.append((None, i, 1))
+                    action_set.append((None, i, -1))
 
-    def action_set(self):
-        # if a player hasn't played all their pieces yet they must put a new piece in play
-        idx = 0 if self.curr_player == -1 else 1
-
-        if self.color_pieces_on_board[idx] < 3:
-            action_space = []
-            # has to put the piece somewhere on the board that isn't taken
-            # first part of the tuple is previous location, second part is destination
-            for i in range(3):
-                for j in range(3):
-                    if self.board[i][j] == (0, 0):
-                        action_space.append((None, ((i, j), -1)))
-                        action_space.append((None, ((i, j), 1)))
-
-            return action_space
+            return action_set
         else:
-            # all pieces are on board, there are only two courses of action
-            # either move horizontally, move diagonally, or jump
+            action_set = []
+            locations = []
+            for i in range(9):
+                if self.positions[i] == self.curr_player:
+                    locations.append((i, self.orientations[i]))
 
-            for r, c, o in self.player_positions[idx]:
+            # can change orientation in place and be considered a move
+            for l, o in locations:
+                action_set.append((l, l, -1 * o))
+
+            # check horizontal ([0, 1, 2], [3, 4, 5], [6, 7, 8])
+            for l, o in locations:
+                # cardinal orientation is required
                 if o == 1:
-                    # horizontal movement/jump
-                    action_space = []
-                    neighbors = [(r-1, c), (r, c-1), (r+1, c), (r, c+1)]
-                    for n in neighbors:
-                        if 0 <= n[0] and n[0] <= 2 and 0 <= n[1] and n[1] <= 2 and self.board[n[0]][n[1]] == (0, 0):
-                            # can move horizontally there, shouldn't run into out of bounds issues i think
-                            action_space.append(((r, c), (n, 1)))
-                            action_space.append(((r, c), (n, -1)))
+                    if l % 3 == 0:
+                        # left of the row
+                        neighbors = [l+1]
+                        if l == 0 or l == 6:
+                            neighbors.append(3)
                         else:
-                            # have to jump horizontally
-                            o_n = ((r + 2 * (n[0] - r), c + 2 * (n[1] - c)))
-                            if 0 <= o_n[0] and o_n[0] <= 2 and 0 <= o_n[1] and o_n[1] <= 2 and self.board[o_n[0]][o_n[1]] == (0, 0):
-                                # this shouldn't run into any out of bounds issues
-                                action_space.append(((r, c), (o_n, 1)))
-                                action_space.append(((r, c), (o_n, -1)))
-
-                    return action_space
+                            neighbors += [0, 6]
+                        for neighbor in neighbors:
+                            if self.positions[neighbor] == 0:
+                                action_set.append((l, neighbor, 1))
+                                action_set.append((l, neighbor, -1))
+                            else:
+                                if neighbor == l+1:
+                                    jump_neighbor = l+2
+                                    if self.positions[jump_neighbor] == 0:
+                                        action_set.append((l, l+2, 1))
+                                        action_set.append((l, l+2, -1))
+                    elif l % 3 == 2:
+                        # right of the row
+                        neighbors = [l-1]
+                        if l == 2 or l == 8:
+                            neighbors.append(5)
+                        else:
+                            neighbors += [2, 8]
+                        for neighbor in neighbors:
+                            if self.positions[neighbor] == 0:
+                                action_set.append((l, neighbor, 1))
+                                action_set.append((l, neighbor, -1))
+                            else:
+                                if neighbor == l-1:
+                                    jump_neighbor = l-2
+                                    if self.positions[jump_neighbor] == 0:
+                                        action_set.append((l, l-2, 1))
+                                        action_set.append((l, l-2, -1))
+                    else:
+                        neighbors = [l+1, l-1]
+                        if l == 1 or l == 7:
+                            neighbors.append(4)
+                        else:
+                            neighbors += [1, 7]
+                        for neighbor in neighbors:
+                            if self.positions[neighbor] == 0:
+                                action_set.append((l, neighbor, 1))
+                                action_set.append((l, neighbor, -1))
+                            else:
+                                # no jumping capability if l = 4
+                                if l == 1 and neighbor == 4:
+                                    jump_neighbor = 7
+                                    if self.positions[jump_neighbor] == 0:
+                                        action_set.append(
+                                            (l, jump_neighbor, 1))
+                                        action_set.append(
+                                            (l, jump_neighbor, -1))
+                                elif l == 7 and neighbor == 4:
+                                    jump_neighbor = 1
+                                    if self.positions[jump_neighbor] == 0:
+                                        action_set.append(
+                                            (l, jump_neighbor, 1))
+                                        action_set.append(
+                                            (l, jump_neighbor, -1))
                 else:
-                    action_space = []
-                    # diagonal
-                    neighbors = [(r-1, c-1), (r+1, c+1),
-                                 (r-1, c+1), (r-1, c-1)]
-                    for n in neighbors:
-                        if 0 <= n[0] and n[0] <= 2 and 0 <= n[1] and n[1] <= 2 and self.board[n[0]][n[1]] == (0, 0):
-                            action_space.append(((r, c), (n, 1)))
-                            action_space.append(((r, c), (n, -1)))
+                    # now we look at diagonals
+                    if l == 4:
+                        # right in middle, can't jump
+                        diag_neighbors = [0, 2, 6, 8]
+                        for diag_neighbor in diag_neighbors:
+                            if self.positions[diag_neighbor] == 0:
+                                action_set.append((l, diag_neighbor, 1))
+                                action_set.append((l, diag_neighbor, -1))
+                    elif l == 0 or l == 2 or l == 6 or l == 8:
+                        # corners, we can jump
+                        diag_neighbor == 4
+                        if self.positions[diag_neighbor] == 0:
+                            action_set.append((l, diag_neighbor, 1))
+                            action_set.append((l, diag_neighbor, -1))
                         else:
-                            o_n = ((r + 2 * (n[0] - r), c + 2 * (n[1] - c)))
-                            if 0 <= o_n[0] and o_n[0] <= 2 and 0 <= o_n[1] and o_n[1] <= 2 and self.board[o_n[0]][o_n[1]] == (0, 0):
-                                action_space.append(((r, c), (o_n, 1)))
-                                action_space.append(((r, c), (o_n, -1)))
+                            jump_diag = 8 - l
+                            if self.positions[jump_diag] == 0:
+                                action_set.append((l, jump_diag, 1))
+                                action_set.append((l, jump_diag, -1))
+                    elif l % 2 == 1:
+                        # middle of rows, can't jump
+                        neighbors == None
+                        if l == 3 or l == 5:
+                            neighbors == [1, 7]
+                        else:
+                            neighbors == [3, 5]
 
-                    return action_space
+                        for diag_neighbor in neighbors:
+                            if self.positions[diag_neighbor] == 0:
+                                action_set.append((l, diag_neighbor, 1))
+                                action_set.append((l, diag_neighbor, -1))
 
-    def act(self, action):
-        # action: (current_loc, (destination, orientation))
-        # assume here that action is in the game state's action_space (we assert it here)
-        assert action in self.action_set()
+            return action_set
 
-        current_loc, dest_orient = action
+    def next_state(self, action):
+        curr_player = 1
+        if self.curr_player[1] == 1:
+            curr_player = -1
 
-        idx = 0 if self.curr_player == -1 else 1
+        prev, dest, o = action
 
-        # clear out old player position
-        self.board[current_loc[0]][current_loc[1]] = (0, 0)
-        for tup in self.player_positions[idx]:
-            if tup[0] == current_loc[0] and tup[1] == current_loc[1]:
-                self.player_positions.remove(tup)
-                break
+        positions = self.positions
+        orientations = self.orientations
+        curr_player_lst = self.curr_player
 
-        # put token at destination with new orientation
-        self.board[dest_orient[0][0]][dest_orient[0][1]] = (
-            self.curr_player, dest_orient[1])
-        self.player_positions.append(
-            (dest_orient[0][0], dest_orient[0][1], dest_orient[1]))
+        if prev:
+            positions[prev] = 0
+            orientations[prev] = 0
+
+        positions[dest] = curr_player
+        orientations[dest] = o
 
         # change player
-        self.curr_player *= -1
+        if self.curr_player == [0, 1]:
+            curr_player_lst = [1, 0]
+        else:
+            curr_player_lst = [0, 1]
 
-    # At this point (if everything works correctly), we have the game setup, the action set for each given state, and the method for executing a particular action
+        return positions + orientations + curr_player_lst
 
-    # one thing we can do is identify the terminal states here in this game, which is when the game officially ends
+    def act(self, action):
+        assert action in self.get_action_set()
+
+        curr_player = 1
+        if self.curr_player[1] == 1:
+            curr_player = -1
+
+        prev, dest, o = action
+
+        if prev:
+            self.positions[prev] = 0
+            self.orientations[prev] = 0
+
+        self.positions[dest] = curr_player
+        self.orientations[dest] = o
+
+        # change player
+        if self.curr_player == [0, 1]:
+            self.curr_player = [1, 0]
+        else:
+            self.curr_player = [0, 1]
+
+    # now we have the game state made, as well as the transition dynamics
+
+    # in order to determine a reward function for this game, it is important to consider terminal states
+
+    # this function determines if the game has ended or not, and outputs the winner if it has ended
     def is_terminal(self):
-        board = self.board
-        # we just check that either a row, a col or a diagonal has been filled up and all colors are the same
         for i in range(3):
-            if board[i][0][0] == board[i][1][0] and board[i][1][0] == board[i][2][0] and board[i][0][0] != 0:
-                return (True, board[i][0][0])
-        for i in range(3):
-            if board[0][i][0] == board[1][i][0] and board[1][i][0] == board[2][i][0] and board[0][i][0] != 0:
-                return (True, board[0][i][0])
-        if board[0][0][0] == board[1][1][0] and board[0][0][0] == board[2][2][0] and board[0][0][0] != 0:
-            return (True, board[0][0][0])
-        elif board[0][2][0] == board[1][1][0] and board[0][2][0] == board[2][0][0] and board[0][2][0] != 0:
-            return (True, board[2][0][0])
-        return False
+            # check rows
+            if self.positions[3 * i] == self.positions[3 * i + 1] and self.positions[i+1] == self.positions[3 * i + 2] and self.positions[3 * i] != 0:
+                return (True, self.positions[3 * i])
+            elif self.positions[i] == self.positions[i + 3] and self.positions[i+3] == self.positions[i+6] and self.positions[i] != 0:
+                # columns show winner
+                return (True, self.positions[i])
 
-    # with this we can define a reward function for the game state, which is 0 if the game isn't done, 1 if the game is won by the state's current player, and -1 otherwise
+        # diagonal check
+        if self.positions[0] == self.positions[4] and self.positions[4] == self.positions[8] and self.positions[0] != 0:
+            return (True, self.positions[0])
+        elif self.positions[2] == self.positions[4] and self.positions[4] == self.positions[6] and self.positions[2] != 0:
+            return (True, self.positions[2])
+
+        return (False, None)
+
     def reward(self):
-        s = self.is_terminal()
-        if s[0]:
-            winner = s[1]
-            if winner == self.curr_player:
+        # program should output 1 if current player won in terminal state, -1 if current player lost in terminal state, and 0 otherwise
+        curr_player = 1
+        if self.curr_player[1] == 1:
+            curr_player = -1
+
+        end, winner = self.is_terminal()
+        if end:
+            if winner == curr_player:
                 return 1
             else:
                 return -1
