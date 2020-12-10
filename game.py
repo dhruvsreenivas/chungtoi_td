@@ -98,3 +98,32 @@ class ChungToi:
 
         # change player
         self.curr_player *= -1
+
+    # At this point (if everything works correctly), we have the game setup, the action set for each given state, and the method for executing a particular action
+
+    # one thing we can do is identify the terminal states here in this game, which is when the game officially ends
+    def is_terminal(self):
+        board = self.board
+        # we just check that either a row, a col or a diagonal has been filled up and all colors are the same
+        for i in range(3):
+            if board[i][0][0] == board[i][1][0] and board[i][1][0] == board[i][2][0] and board[i][0][0] != 0:
+                return (True, board[i][0][0])
+        for i in range(3):
+            if board[0][i][0] == board[1][i][0] and board[1][i][0] == board[2][i][0] and board[0][i][0] != 0:
+                return (True, board[0][i][0])
+        if board[0][0][0] == board[1][1][0] and board[0][0][0] == board[2][2][0] and board[0][0][0] != 0:
+            return (True, board[0][0][0])
+        elif board[0][2][0] == board[1][1][0] and board[0][2][0] == board[2][0][0] and board[0][2][0] != 0:
+            return (True, board[2][0][0])
+        return False
+
+    # with this we can define a reward function for the game state, which is 0 if the game isn't done, 1 if the game is won by the state's current player, and -1 otherwise
+    def reward(self):
+        s = self.is_terminal()
+        if s[0]:
+            winner = s[1]
+            if winner == self.curr_player:
+                return 1
+            else:
+                return -1
+        return 0
