@@ -22,6 +22,7 @@ class Agent:
     def forward(self, state):
         assert len(state) == 20
         state = torch.FloatTensor(state)
+        state = state.view(-1, 20)
         value = F.tanh(2/3 * self.linear1(state)) * 1.7159
         value = self.linear2(value)
         return value
@@ -30,6 +31,7 @@ class Agent:
         arr = [0] * 20
         arr[18] = 1
         arr = torch.FloatTensor(arr)
+        arr = arr.view(-1, 20)
         return self.forward(arr)
 
     def select_action(self, game):
