@@ -15,7 +15,7 @@ class Agent:
         # value network (make sure to initialize weights like in paper later on)
         self.linear1 = nn.Linear(20, 30, bias=True)
         self.linear2 = nn.Linear(30, 1)
-        self.prev_evals = [0]
+        self.prev_evals = []
 
         self.optimizer = torch.optim.Adam(lr=self.lr)
 
@@ -26,7 +26,7 @@ class Agent:
         value = self.linear2(value)
         return value
 
-    def initial_state_val(self, game):
+    def initial_state_val(self):
         arr = [0] * 20
         arr[18] = 1
         arr = torch.FloatTensor(arr)
@@ -54,8 +54,8 @@ class Agent:
 
     # do the action and legit change the state of the game
     def act(self, game, action):
-        # append eval
         game.act(action)
+        # add new state evaluation
         value = self.forward(game.get_state())
         self.prev_evals.append(value)
 
@@ -63,9 +63,14 @@ class Agent:
     # need to fless out the zero case at the start
     def update_value_fn(self):
         disc_loss = 0
+        if len(self.prev_evals) == 1:
+            # we've only added one initial state, also there's no update done by the time we do this step in the pipeline so this evaluation is good
+            self.prev_evals.insert(0, self.initial_state_val())
+
+        # notice here that the current state (state that shouldn't have been evaluated) is at end of prev_evals list
         latest_diff = self.prev_evals[-1] - self.prev_evals[-2]
         t = len(self.prev_evals)-1
-        for k in range(len(self.prev_evals)-1):
+        for k in range(t):
             disc_loss += ((self.td_lam ** (t-k)) * self.prev_evals[k])
 
         loss = self.alpha * latest_diff * disc_loss
