@@ -53,7 +53,7 @@ class Agent:
         self.loss += value
         game.act(action)
 
-    # update method uses the TD learning method that Tesauro used to learn TD-Gammon
+    # update method uses the TD learning method that Tesauro derived & implemented for TD-Gammon
     def update_value_fn(self):
         # every time you have a loss, you multiply the current loss value by lambda and add Y_t
         self.optimizer.zero_grad()
