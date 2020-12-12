@@ -6,15 +6,16 @@ import random
 
 
 class Agent:
-    def __init__(self, td_lam, lr, eps):
+    def __init__(self, td_lam, alpha, lr, eps):
         self.td_lam = td_lam
+        self.alpha = alpha
         self.lr = lr
         self.eps = eps  # this is for epsilon-greedy strategy with respect to value function given by network below
 
         # value network (make sure to initialize weights like in paper later on)
         self.linear1 = nn.Linear(20, 30, bias=True)
         self.linear2 = nn.Linear(30, 1)
-        self.loss = 0
+        self.prev_evals = [0]
 
         self.optimizer = torch.optim.Adam(lr=self.lr)
 
@@ -24,6 +25,12 @@ class Agent:
         value = F.tanh(2/3 * self.linear1(state)) * 1.7159
         value = self.linear2(value)
         return value
+
+    def initial_state_val(self, game):
+        arr = [0] * 20
+        arr[18] = 1
+        arr = torch.FloatTensor(arr)
+        return self.forward(arr)
 
     def select_action(self, game):
         # epsilon greedy
@@ -47,15 +54,21 @@ class Agent:
 
     # do the action and legit change the state of the game
     def act(self, game, action):
-        # take current value evaluation of state and add it to past value evaluations
-        value = self.forward(game.get_state())
-        self.loss *= self.td_lam
-        self.loss += value
+        # append eval
         game.act(action)
+        value = self.forward(game.get_state())
+        self.prev_evals.append(value)
 
     # update method uses the TD learning method that Tesauro derived & implemented for TD-Gammon
+    # need to fless out the zero case at the start
     def update_value_fn(self):
-        # every time you have a loss, you multiply the current loss value by lambda and add Y_t
+        disc_loss = 0
+        latest_diff = self.prev_evals[-1] - self.prev_evals[-2]
+        t = len(self.prev_evals)-1
+        for k in range(len(self.prev_evals)-1):
+            disc_loss += ((self.td_lam ** (t-k)) * self.prev_evals[k])
+
+        loss = self.alpha * latest_diff * disc_loss
         self.optimizer.zero_grad()
-        self.loss.backward()
+        loss.backward()
         self.optimizer.step()
