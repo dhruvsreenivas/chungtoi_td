@@ -140,6 +140,7 @@ class ChungToi:
             return action_set
 
     def next_state(self, action):
+        # will return the next state and reward of completing that action in the next state
         curr_player = 1
         if self.curr_player[1] == 1:
             curr_player = -1
@@ -163,7 +164,8 @@ class ChungToi:
         else:
             curr_player_lst = [0, 1]
 
-        return positions + orientations + curr_player_lst
+        next_state = positions + orientations + curr_player_lst
+        return next_state, self.reward(next_state)
 
     def act(self, action):
         assert action in self.get_action_set()
@@ -194,30 +196,30 @@ class ChungToi:
     # in order to determine a reward function for this game, it is important to consider terminal states
 
     # this function determines if the game has ended or not, and outputs the winner if it has ended
-    def is_terminal(self):
+    def is_terminal(self, state):
         for i in range(3):
             # check rows
-            if self.positions[3 * i] == self.positions[3 * i + 1] and self.positions[i+1] == self.positions[3 * i + 2] and self.positions[3 * i] != 0:
-                return (True, self.positions[3 * i])
-            elif self.positions[i] == self.positions[i + 3] and self.positions[i+3] == self.positions[i+6] and self.positions[i] != 0:
+            if state[3 * i] == state[3 * i + 1] and state[i+1] == state[3 * i + 2] and state[3 * i] != 0:
+                return (True, state[3 * i])
+            elif state[i] == state[i + 3] and state[i+3] == state[i+6] and state[i] != 0:
                 # columns show winner
-                return (True, self.positions[i])
+                return (True, state[i])
 
         # diagonal check
-        if self.positions[0] == self.positions[4] and self.positions[4] == self.positions[8] and self.positions[0] != 0:
-            return (True, self.positions[0])
-        elif self.positions[2] == self.positions[4] and self.positions[4] == self.positions[6] and self.positions[2] != 0:
-            return (True, self.positions[2])
+        if state[0] == state[4] and state[4] == state[8] and state[0] != 0:
+            return (True, state[0])
+        elif state[2] == state[4] and state[4] == state[6] and state[2] != 0:
+            return (True, state[2])
 
         return (False, None)
 
-    def reward(self):
+    def reward(self, state):
         # program should output 1 if current player won in terminal state, -1 if current player lost in terminal state, and 0 otherwise
         curr_player = 1
         if self.curr_player[1] == 1:
             curr_player = -1
 
-        end, winner = self.is_terminal()
+        end, winner = state.is_terminal()
         if end:
             if winner == curr_player:
                 return 1
