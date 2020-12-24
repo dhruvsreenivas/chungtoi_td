@@ -1,3 +1,6 @@
+from termcolor import colored
+
+
 class ChungToi:
     def __init__(self):
         self.positions = [0] * 9
@@ -228,3 +231,46 @@ class ChungToi:
             else:
                 return -1
         return 0
+
+    # Finally, we need a way to visualize the game
+    def print_game_state(self):
+        player_1_color = 'red'
+        player_2_color = 'blue'
+        for row in range(3):
+            row_str = ''
+            for j in range(3):
+                if self.positions[3 * row + j] == 0:
+                    if j == 2:
+                        row_str += ' '
+                    else:
+                        row_str += ' | '
+                elif self.positions[3 * row + j] == 1:
+                    if j == 2:
+                        if self.orientations[3 * row + j] == 1:
+                            # coordinate aligned
+                            row_str += (colored('+', player_1_color))
+                        else:
+                            row_str += (colored('X', player_1_color))
+                    else:
+                        if self.orientations[3 * row + j] == 1:
+                            row_str += (colored('+', player_1_color) + ' | ')
+                        else:
+                            row_str += (colored('X', player_1_color) + ' | ')
+                else:
+                    if j == 2:
+                        if self.orientations[3 * row + j] == 1:
+                            # coordinate aligned
+                            row_str += (colored('+', player_2_color))
+                        else:
+                            row_str += (colored('X', player_2_color))
+                    else:
+                        if self.orientations[3 * row + j] == 1:
+                            row_str += (colored('+', player_2_color) + ' | ')
+                        else:
+                            row_str += (colored('X', player_2_color) + ' | ')
+
+            if row < 2:
+                print(row_str)
+                print('-------------------------')
+            else:
+                print(row_str)
