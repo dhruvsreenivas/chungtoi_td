@@ -8,6 +8,7 @@ def play_game(game, agent, adversary_agent):
         curr_state = game.get_state()
         action = player.select_action(game)
         next_state, reward = game.act(action)
+        game.print_game_state()
         player.update(curr_state, action, reward, next_state)
         if player == agent:
             player = adversary_agent
