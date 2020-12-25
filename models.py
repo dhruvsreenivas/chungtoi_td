@@ -43,7 +43,7 @@ class Agent:
 
     def comp_q_value(self, action):
         # will compute action value given current game state (in self.game) and current best action using bellman approximation
-        next_state, reward = self.game.next_state(action)
+        next_state, reward = self.game.act(action)
         return reward + self.gamma * self.comp_value(next_state)
 
     def comp_value(self, state):

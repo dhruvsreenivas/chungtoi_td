@@ -3,12 +3,12 @@ from models import Agent
 
 
 def play_game(game, agent, adversary_agent):
-    player = agent if game.curr_player == 1 else adversary_agent
+    player = agent if game.curr_player[0] == 1 else adversary_agent
     while not game.is_terminal()[0]:
         curr_state = game.get_state()
         action = player.select_action(game)
         next_state, reward = game.act(action)
-        game.print_game_state()
+        game.render()
         player.update(curr_state, action, reward, next_state)
         if player == agent:
             player = adversary_agent
