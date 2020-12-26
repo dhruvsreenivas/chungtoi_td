@@ -8,7 +8,7 @@ def play_game(game, agent, adversary_agent):
     agent_prev_action = None
     adv_prev_state = None
     adv_prev_action = None
-    while not game.is_terminal()[0]:
+    while True:
         curr_state = game.get_state()
         # player 1 moves
         action = agent.select_action()
@@ -24,6 +24,7 @@ def play_game(game, agent, adversary_agent):
             adversary_agent.update(
                 adv_prev_state, adv_prev_action, -1 * reward_1, next_state)
 
+        # if player 1 finishes the game it has to update its Q table
         if game.is_terminal()[0]:
             agent.update(agent_prev_state, agent_prev_action,
                          reward_1, next_state)
@@ -43,9 +44,12 @@ def play_game(game, agent, adversary_agent):
             agent.update(agent_prev_state, agent_prev_action,
                          -1 * reward_2, next_state)
 
-    # if game is over after player 2 move you have to update player 2's Q values
-    state = game.get_state()
-    adversary_agent.update(adv_prev_state, adv_prev_action, reward_2, state)
+        # if game is over after player 2 move you have to update player 2's Q values
+        if game.is_terminal()[0]:
+            state = game.get_state()
+            adversary_agent.update(
+                adv_prev_state, adv_prev_action, reward_2, state)
+            break
 
 
 def play_games(num_games, game, agent, adversary_agent):

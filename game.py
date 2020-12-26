@@ -202,7 +202,7 @@ class ChungToi:
                 if self.curr_player == 1:
                     print('Player ' + str(self.curr_player) + ' won!')
                 else:
-                    print('Player 2 won!')
+                    print('Other player won!')
                 reward = 1
             else:
                 reward = -1
