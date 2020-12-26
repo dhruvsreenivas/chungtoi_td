@@ -1,5 +1,5 @@
 from game import ChungToi
-from models import QLearningAgent
+from agents import QLearningAgent
 
 
 def play_game(game, agent, adversary_agent):
@@ -62,6 +62,6 @@ if __name__ == '__main__':
     game = ChungToi()
     agent = QLearningAgent(gamma=0.99, eps=0.85, alpha=0.001, game=game)
     adversary_agent = QLearningAgent(
-        gamma=0.99, eps=0.15, alpha=0.001, game=game)
+        gamma=0.99, eps=0.85, alpha=0.001, game=game)
 
     play_games(NUM_GAMES, game, agent, adversary_agent)
