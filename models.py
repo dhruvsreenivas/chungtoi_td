@@ -2,7 +2,7 @@ from collections import defaultdict
 import numpy as np
 
 
-class Agent:
+class QLearningAgent:
     # pretty much based off of https://github.com/kamenbliznashki/sutton_barto/blob/master/agents.py
 
     def __init__(self, gamma, alpha, eps, game):
@@ -24,7 +24,7 @@ class Agent:
 
     def get_best_action(self):
         s = self.game.get_state()
-        action_set = self.game.get_action_set()
+        action_set = self.game.get_action_set(s)
         q_vals = [self.q_values[(s, action)] for action in action_set]
         best_q = np.max(q_vals)
         # will have a list of actions where estimated Q value is largest
@@ -35,7 +35,7 @@ class Agent:
         return action
 
     def select_action(self):
-        action_set = self.game.get_action_set()
+        action_set = self.game.get_action_set(self.game.get_state())
         if action_set == []:
             return None
         else:
@@ -46,23 +46,12 @@ class Agent:
                 idx = np.random.choice(len(action_set))
                 return action_set[idx]
 
-    def comp_q_value(self, action):
-        # will compute action value given current game state (in self.game) and current best action using bellman approximation
-        next_state, reward = self.game.act(action)
-        return reward + self.gamma * self.comp_value(next_state)
-
-    def comp_value(self, state):
-        best_action = self.get_best_action()
-        if not best_action:
-            return None
-        else:
-            return self.comp_q_value(best_action)
-
     def update(self, state, action, reward, next_state):
         # Q(s, a) += (r + gamma * max_a(Q(s', a)) - Q(s, a)), will return new Q value
         curr_q = self.q_value(state, action)
-        next_q = self.comp_value(next_state)
-        self.q_values[(state, action)] += self.alpha * (reward +
-                                                        self.gamma * next_q - curr_q)
+        next_q = np.max([self.q_values[(next_state, a)]
+                         for a in self.game.get_action_set(next_state)])
+        self.q_values[(state, action)] += (self.alpha * (reward +
+                                                         self.gamma * next_q - curr_q))
         self.num_updates_done += 1
         return self.q_values[(state, action)]

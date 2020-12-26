@@ -19,17 +19,21 @@ class ChungToi:
     def get_state(self):
         return self.positions + self.orientations
 
-    def get_action_set(self):
+    def get_action_set(self, state):
+        positions = state[:9]
+        orientations = state[9:]
+        # if we don't have a state, replace state (positions, orientations) with self.positions + self.orientations (in case we need to switch back later)
+
         # if game has already ended, there are no actions to be done
         if self.is_terminal()[0]:
             return []
 
         # if we don't have all the pieces on the board, we must put all of our pieces on board (put on empty space)
         # every action can be encoded as (prev_pos, next_pos, orientation)
-        if self.positions.count(self.curr_player) < 3:
+        if positions.count(self.curr_player) < 3:
             action_set = []
             for i in range(9):
-                if self.positions[i] == 0:
+                if positions[i] == 0:
                     action_set.append((None, i, 1))
                     action_set.append((None, i, -1))
 
@@ -38,8 +42,8 @@ class ChungToi:
             action_set = []
             locations = []
             for i in range(9):
-                if self.positions[i] == self.curr_player:
-                    locations.append((i, self.orientations[i]))
+                if positions[i] == self.curr_player:
+                    locations.append((i, orientations[i]))
 
             # can change orientation in place and be considered a move
             for l, o in locations:
@@ -57,19 +61,19 @@ class ChungToi:
                         else:
                             neighbors += [0, 6]
                         for neighbor in neighbors:
-                            if self.positions[neighbor] == 0:
+                            if positions[neighbor] == 0:
                                 action_set.append((l, neighbor, 1))
                                 action_set.append((l, neighbor, -1))
                             else:
                                 if neighbor == l+1:
                                     jump_neighbor = l+2
-                                    if self.positions[jump_neighbor] == 0:
+                                    if positions[jump_neighbor] == 0:
                                         # is a horizontal jump
                                         action_set.append((l, l+2, 1))
                                         action_set.append((l, l+2, -1))
                                 elif l == 0 and neighbor == 3:
                                     jump_neighbor = 6
-                                    if self.positions[jump_neighbor] == 0:
+                                    if positions[jump_neighbor] == 0:
                                         # is a vertical jump
                                         action_set.append(
                                             (l, jump_neighbor, 1))
@@ -77,7 +81,7 @@ class ChungToi:
                                             (l, jump_neighbor, -1))
                                 elif l == 6 and neighbor == 3:
                                     jump_neighbor = 0
-                                    if self.positions[jump_neighbor] == 0:
+                                    if positions[jump_neighbor] == 0:
                                         # is a horizontal jump
                                         action_set.append(
                                             (l, jump_neighbor, 1))
@@ -91,19 +95,19 @@ class ChungToi:
                         else:
                             neighbors += [2, 8]
                         for neighbor in neighbors:
-                            if self.positions[neighbor] == 0:
+                            if positions[neighbor] == 0:
                                 action_set.append((l, neighbor, 1))
                                 action_set.append((l, neighbor, -1))
                             else:
                                 if neighbor == l-1:
                                     jump_neighbor = l-2
-                                    if self.positions[jump_neighbor] == 0:
+                                    if positions[jump_neighbor] == 0:
                                         # also a horizontal jump
                                         action_set.append((l, l-2, 1))
                                         action_set.append((l, l-2, -1))
                                 elif l == 2 and neighbor == 5:
                                     jump_neighbor = 8
-                                    if self.positions[jump_neighbor] == 0:
+                                    if positions[jump_neighbor] == 0:
                                         # is a vertical jump
                                         action_set.append(
                                             (l, jump_neighbor, 1))
@@ -111,7 +115,7 @@ class ChungToi:
                                             (l, jump_neighbor, -1))
                                 elif l == 8 and neighbor == 5:
                                     jump_neighbor = 2
-                                    if self.positions[jump_neighbor] == 0:
+                                    if positions[jump_neighbor] == 0:
                                         # is a horizontal jump
                                         action_set.append(
                                             (l, jump_neighbor, 1))
@@ -124,21 +128,21 @@ class ChungToi:
                         else:
                             neighbors += [1, 7]
                         for neighbor in neighbors:
-                            if self.positions[neighbor] == 0:
+                            if positions[neighbor] == 0:
                                 action_set.append((l, neighbor, 1))
                                 action_set.append((l, neighbor, -1))
                             else:
                                 # no jumping capability if l = 4
                                 if l == 1 and neighbor == 4:
                                     jump_neighbor = 7
-                                    if self.positions[jump_neighbor] == 0:
+                                    if positions[jump_neighbor] == 0:
                                         action_set.append(
                                             (l, jump_neighbor, 1))
                                         action_set.append(
                                             (l, jump_neighbor, -1))
                                 elif l == 7 and neighbor == 4:
                                     jump_neighbor = 1
-                                    if self.positions[jump_neighbor] == 0:
+                                    if positions[jump_neighbor] == 0:
                                         action_set.append(
                                             (l, jump_neighbor, 1))
                                         action_set.append(
@@ -149,18 +153,18 @@ class ChungToi:
                         # right in middle, can't jump
                         diag_neighbors = [0, 2, 6, 8]
                         for diag_neighbor in diag_neighbors:
-                            if self.positions[diag_neighbor] == 0:
+                            if positions[diag_neighbor] == 0:
                                 action_set.append((l, diag_neighbor, 1))
                                 action_set.append((l, diag_neighbor, -1))
                     elif l == 0 or l == 2 or l == 6 or l == 8:
                         # corners, we can jump
                         d_neighbor = 4
-                        if self.positions[d_neighbor] == 0:
+                        if positions[d_neighbor] == 0:
                             action_set.append((l, d_neighbor, 1))
                             action_set.append((l, d_neighbor, -1))
                         else:
                             jump_diag = 8 - l
-                            if self.positions[jump_diag] == 0:
+                            if positions[jump_diag] == 0:
                                 action_set.append((l, jump_diag, 1))
                                 action_set.append((l, jump_diag, -1))
                     elif l % 2 == 1:
@@ -172,14 +176,14 @@ class ChungToi:
                             neighbors = [3, 5]
 
                         for diag_neighbor in neighbors:
-                            if self.positions[diag_neighbor] == 0:
+                            if positions[diag_neighbor] == 0:
                                 action_set.append((l, diag_neighbor, 1))
                                 action_set.append((l, diag_neighbor, -1))
 
             return action_set
 
-    def act(self, action):
-        assert action in self.get_action_set()
+    def act(self, state, action):
+        assert action in self.get_action_set(state)
 
         prev, dest, o = action
 

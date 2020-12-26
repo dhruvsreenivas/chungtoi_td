@@ -1,19 +1,51 @@
 from game import ChungToi
-from models import Agent
+from models import QLearningAgent
 
 
 def play_game(game, agent, adversary_agent):
-    player = agent if game.curr_player[0] == 1 else adversary_agent
+    game.reset()
+    agent_prev_state = game.get_state()
+    agent_prev_action = None
+    adv_prev_state = None
+    adv_prev_action = None
     while not game.is_terminal()[0]:
         curr_state = game.get_state()
-        action = player.select_action(game)
-        next_state, reward = game.act(action)
+        # player 1 moves
+        action = agent.select_action()
+        next_state, reward_1 = game.act(curr_state, action)
         game.render()
-        player.update(curr_state, action, reward, next_state)
-        if player == agent:
-            player = adversary_agent
-        else:
-            player = agent
+
+        # update previous state, action for agent
+        agent_prev_state = curr_state
+        agent_prev_action = action
+
+        # player 2 updates
+        if adv_prev_state and adv_prev_action:
+            adversary_agent.update(
+                adv_prev_state, adv_prev_action, -1 * reward_1, next_state)
+
+        if game.is_terminal()[0]:
+            agent.update(agent_prev_state, agent_prev_action,
+                         reward_1, next_state)
+            break
+
+        # player 2 makes a move now
+        curr_state = game.get_state()
+        action = adversary_agent.select_action()
+        next_state, reward_2 = game.act(curr_state, action)
+
+        # update previous state, action for adversary
+        adv_prev_state = curr_state
+        adv_prev_action = action
+
+        # player 1 updates
+        if agent_prev_state and agent_prev_action:
+            agent.update(agent_prev_state, agent_prev_action,
+                         -1 * reward_2, next_state)
+
+    # if game is over after player 2 move you have to update player 2's Q values
+    state = game.get_state()
+    adversary_agent.update(adv_prev_state, adv_prev_action, reward_2, state)
 
 
 def play_games(num_games, game, agent, adversary_agent):
@@ -24,7 +56,8 @@ def play_games(num_games, game, agent, adversary_agent):
 if __name__ == '__main__':
     NUM_GAMES = 200
     game = ChungToi()
-    agent = Agent(gamma=0.99, eps=0.85, alpha=0.001, game=game)
-    adversary_agent = Agent(gamma=0.99, eps=0.15, alpha=0.001, game=game)
+    agent = QLearningAgent(gamma=0.99, eps=0.85, alpha=0.001, game=game)
+    adversary_agent = QLearningAgent(
+        gamma=0.99, eps=0.15, alpha=0.001, game=game)
 
     play_games(NUM_GAMES, game, agent, adversary_agent)
