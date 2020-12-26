@@ -19,12 +19,12 @@ class QLearningAgent:
         self.num_updates_done = 0
 
     def q_value(self, state, action):
-        return self.q_values[(state, action)]
+        return self.q_values[(tuple(state), action)]
 
     def get_best_action(self):
         s = self.game.get_state()
         action_set = self.game.get_action_set(s)
-        q_vals = [self.q_values[(s, action)] for action in action_set]
+        q_vals = [self.q_value(s, action) for action in action_set]
         best_q = np.max(q_vals)
         # will have a list of actions where estimated Q value is largest
         best_actions = [a for i, a in enumerate(
@@ -47,9 +47,9 @@ class QLearningAgent:
 
     def update(self, state, action, reward, next_state):
         # Q(s, a) += (r + gamma * max_a(Q(s', a)) - Q(s, a)), will return new Q value
-        curr_q = self.q_value(state, action)
-        next_q = np.max([self.q_values[(next_state, a)]
+        curr_q = self.q_value(tuple(state), action)
+        next_q = np.max([self.q_value(next_state, a)
                          for a in self.game.get_action_set(next_state)])
-        self.q_values[(state, action)] += (self.alpha * (reward +
-                                                         self.gamma * next_q - curr_q))
-        return self.q_values[(state, action)]
+        self.q_values[(tuple(state), action)] += (self.alpha * (reward +
+                                                                self.gamma * next_q - curr_q))
+        return self.q_values[(tuple(state), action)]

@@ -1,6 +1,6 @@
 from termcolor import colored
 import pyglet
-from pyglet import shapes
+# from pyglet import shapes
 
 
 class ChungToi:
@@ -279,64 +279,64 @@ class ChungToi:
             else:
                 print(row_str)
 
-    def render(self):
-        window = pyglet.window.Window(600, 600, 'Chung Toi')
-        window.set_minimum_size(300, 300)
-        batch = pyglet.graphics.Batch()
+    # def render(self):
+    #     window = pyglet.window.Window(600, 600, 'Chung Toi')
+    #     window.set_minimum_size(300, 300)
+    #     batch = pyglet.graphics.Batch()
 
-        # define all shapes that we want to draw in
-        # the normal horizontal and vertical lines for the game
-        horiz_line_1 = shapes.Line(
-            50, 150, 550, 150, width=3, color=(0, 0, 0), batch=batch)
-        horiz_line_2 = shapes.Line(
-            50, 350, 550, 350, width=3, color=(0, 0, 0), batch=batch)
-        vert_line_1 = shapes.Line(
-            150, 50, 150, 550, width=3, color=(0, 0, 0), batch=batch)
-        vert_line_2 = shapes.Line(
-            350, 50, 350, 550, width=3, color=(0, 0, 0), batch=batch)
+    #     # define all shapes that we want to draw in
+    #     # the normal horizontal and vertical lines for the game
+    #     horiz_line_1 = shapes.Line(
+    #         50, 150, 550, 150, width=3, color=(0, 0, 0), batch=batch)
+    #     horiz_line_2 = shapes.Line(
+    #         50, 350, 550, 350, width=3, color=(0, 0, 0), batch=batch)
+    #     vert_line_1 = shapes.Line(
+    #         150, 50, 150, 550, width=3, color=(0, 0, 0), batch=batch)
+    #     vert_line_2 = shapes.Line(
+    #         350, 50, 350, 550, width=3, color=(0, 0, 0), batch=batch)
 
-        radius = 75
-        centers_dict = {}
-        centers_dict[0] = [50, 450]
-        centers_dict[1] = [250, 450]
-        centers_dict[2] = [450, 450]
-        centers_dict[3] = [50, 250]
-        centers_dict[4] = [250, 250]
-        centers_dict[5] = [450, 250]
-        centers_dict[6] = [50, 50]
-        centers_dict[7] = [250, 50]
-        centers_dict[8] = [450, 50]
+    #     radius = 75
+    #     centers_dict = {}
+    #     centers_dict[0] = [50, 450]
+    #     centers_dict[1] = [250, 450]
+    #     centers_dict[2] = [450, 450]
+    #     centers_dict[3] = [50, 250]
+    #     centers_dict[4] = [250, 250]
+    #     centers_dict[5] = [450, 250]
+    #     centers_dict[6] = [50, 50]
+    #     centers_dict[7] = [250, 50]
+    #     centers_dict[8] = [450, 50]
 
-        for idx in range(9):
-            center = centers_dict[idx]
-            if self.positions[idx] == 1:
-                # red player
-                red = (255, 0, 0)
-                # centers in order are (50, 450), (250, 450), (450, 450), (50, 250), (250, 250), (450, 250), (50, 50), (250, 50), (450, 50)
-                # rough estimate, subject to change
-                if self.orientations[idx] == 1:
-                    line1 = shapes.Line(
-                        center[0], center[1] - radius, center[0], center[1] + radius, width=3, color=red, batch=batch)
-                    line2 = shapes.Line(
-                        center[0] - radius, center[1], center[0] + radius, center[1], width=3, color=red, batch=batch)
-                else:
-                    line1 = shapes.Line(
-                        center[0] - radius, center[1] - radius, center[0] + radius, center[1] + radius, width=3, color=red, batch=batch)
-                    line2 = shapes.Line(
-                        center[0] - radius, center[1] + radius, center[0] + radius, center[1] - radius, width=3, color=red, batch=batch)
+    #     for idx in range(9):
+    #         center = centers_dict[idx]
+    #         if self.positions[idx] == 1:
+    #             # red player
+    #             red = (255, 0, 0)
+    #             # centers in order are (50, 450), (250, 450), (450, 450), (50, 250), (250, 250), (450, 250), (50, 50), (250, 50), (450, 50)
+    #             # rough estimate, subject to change
+    #             if self.orientations[idx] == 1:
+    #                 line1 = shapes.Line(
+    #                     center[0], center[1] - radius, center[0], center[1] + radius, width=3, color=red, batch=batch)
+    #                 line2 = shapes.Line(
+    #                     center[0] - radius, center[1], center[0] + radius, center[1], width=3, color=red, batch=batch)
+    #             else:
+    #                 line1 = shapes.Line(
+    #                     center[0] - radius, center[1] - radius, center[0] + radius, center[1] + radius, width=3, color=red, batch=batch)
+    #                 line2 = shapes.Line(
+    #                     center[0] - radius, center[1] + radius, center[0] + radius, center[1] - radius, width=3, color=red, batch=batch)
 
-            else:
-                blue = (0, 0, 255)
-                if self.orientations[idx] == 1:
-                    line1 = shapes.Line(
-                        center[0], center[1] - radius, center[0], center[1] + radius, width=3, color=blue, batch=batch)
-                    line2 = shapes.Line(
-                        center[0] - radius, center[1], center[0] + radius, center[1], width=3, color=blue, batch=batch)
-                else:
-                    line1 = shapes.Line(
-                        center[0] - radius, center[1] - radius, center[0] + radius, center[1] + radius, width=3, color=blue, batch=batch)
-                    line2 = shapes.Line(
-                        center[0] - radius, center[1] + radius, center[0] + radius, center[1] - radius, width=3, color=blue, batch=batch)
+    #         else:
+    #             blue = (0, 0, 255)
+    #             if self.orientations[idx] == 1:
+    #                 line1 = shapes.Line(
+    #                     center[0], center[1] - radius, center[0], center[1] + radius, width=3, color=blue, batch=batch)
+    #                 line2 = shapes.Line(
+    #                     center[0] - radius, center[1], center[0] + radius, center[1], width=3, color=blue, batch=batch)
+    #             else:
+    #                 line1 = shapes.Line(
+    #                     center[0] - radius, center[1] - radius, center[0] + radius, center[1] + radius, width=3, color=blue, batch=batch)
+    #                 line2 = shapes.Line(
+    #                     center[0] - radius, center[1] + radius, center[0] + radius, center[1] - radius, width=3, color=blue, batch=batch)
 
-            window.clear()
-            batch.draw()
+    #         window.clear()
+    #         batch.draw()
