@@ -13,7 +13,8 @@ def play_game(game, agent, adversary_agent):
         # player 1 moves
         action = agent.select_action()
         next_state, reward_1 = game.act(curr_state, action)
-        game.render()
+        # print for now, try to make it render later
+        game.print_game_state()
 
         # update previous state, action for agent
         agent_prev_state = curr_state
@@ -51,10 +52,20 @@ def play_game(game, agent, adversary_agent):
                 adv_prev_state, adv_prev_action, reward_2, state)
             break
 
+    return game.is_terminal()[1]
+
 
 def play_games(num_games, game, agent, adversary_agent):
+    player_1_wins = 0
+    player_2_wins = 0
     for _ in range(num_games):
-        play_game(game, agent, adversary_agent)
+        winner = play_game(game, agent, adversary_agent)
+        if winner == 1:
+            player_1_wins += 1
+        else:
+            player_2_wins += 1
+
+    return player_1_wins, player_2_wins
 
 
 if __name__ == '__main__':
@@ -64,4 +75,6 @@ if __name__ == '__main__':
     adversary_agent = QLearningAgent(
         gamma=0.99, eps=0.85, alpha=0.001, game=game)
 
-    play_games(NUM_GAMES, game, agent, adversary_agent)
+    player_1_wins, player_2_wins = play_games(
+        NUM_GAMES, game, agent, adversary_agent)
+    print(player_1_wins, player_2_wins)

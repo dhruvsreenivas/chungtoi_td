@@ -12,7 +12,6 @@ class QLearningAgent:
         self.eps = eps  # eps-greedy parameter
         # will keep track of q values of all (s, a) encountered
         self.q_values = defaultdict(float)
-        self.num_updates_done = 0
         self.game = game
 
     def reset(self):
@@ -53,5 +52,4 @@ class QLearningAgent:
                          for a in self.game.get_action_set(next_state)])
         self.q_values[(state, action)] += (self.alpha * (reward +
                                                          self.gamma * next_q - curr_q))
-        self.num_updates_done += 1
         return self.q_values[(state, action)]
