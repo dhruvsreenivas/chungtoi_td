@@ -39,7 +39,12 @@ class Agent:
         if action_set == []:
             return None
         else:
-            return self.get_best_action()
+            if np.random.uniform() < self.eps:
+                return self.get_best_action()
+            else:
+                # return any random action in action_set
+                idx = np.random.choice(len(action_set))
+                return action_set[idx]
 
     def comp_q_value(self, action):
         # will compute action value given current game state (in self.game) and current best action using bellman approximation
