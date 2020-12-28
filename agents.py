@@ -36,7 +36,7 @@ class QLearningAgent:
     def select_action(self):
         action_set = self.game.get_action_set(self.game.get_state())
         if action_set == []:
-            return None
+            raise Exception('No action available to take--game is over')
         else:
             if np.random.uniform() < self.eps:
                 return self.get_best_action()
@@ -47,9 +47,57 @@ class QLearningAgent:
 
     def update(self, state, action, reward, next_state):
         # Q(s, a) += (r + gamma * max_a(Q(s', a)) - Q(s, a)), will return new Q value
-        curr_q = self.q_value(tuple(state), action)
-        next_q = np.max([self.q_value(next_state, a)
-                         for a in self.game.get_action_set(next_state)])
+        curr_q = self.q_value(state, action)
+        action_vals = [self.q_value(next_state, a)
+                       for a in self.game.get_action_set(next_state)]
+        if len(action_vals) > 0:
+            next_q = np.max(action_vals)
+        else:
+            next_q = 0
         self.q_values[(tuple(state), action)] += (self.alpha * (reward +
                                                                 self.gamma * next_q - curr_q))
         return self.q_values[(tuple(state), action)]
+
+
+class ValueAgent:
+    def __init__(self, alpha, player_num, eps):
+        self.alpha = alpha
+        self.player_num = player_num
+        self.eps = eps
+        # assigns probability of winning from each of those given states
+        self.state_vals = defaultdict(float)
+        # have to make sure that the probability of winning from the winning states is 1, losing states is 0, other states is 0.5
+        # basically revolves around getting a list of all possible states of the game, and making a dict that assigns the probabilities accordingly
+
+    def reset(self):
+        self.state_vals = defaultdict(float)
+
+    def get_value(self, state):
+        return self.state_vals[tuple(state)]
+
+    def get_best_action(self, game):
+        s = game.get_state()
+        action_set = game.get_action_set(s)
+        next_state_vals = [self.state_vals[tuple(
+            game.next_state(s, action))] for action in action_set]
+        best_state_val = np.max(next_state_vals)
+        best_actions = [a for i, a in enumerate(
+            action_set) if next_state_vals[i] == best_state_val]
+        action_idx = np.random.choice(len(best_actions))
+        return best_actions[action_idx]
+
+    def select_action(self, game):
+        s = game.get_state()
+        action_set = game.get_action_set(s)
+        if np.random.uniform() < self.eps:
+            # epsilon chance you take the greedy action
+            return self.get_best_action(game)
+        else:
+            return action_set[np.random.choice(len(action_set))]
+
+    def update(self, state, reward, next_state):
+        # V(s) <- V(s) + alpha * (V(s') - V(s))
+        curr_val = self.state_vals[tuple(state)]
+        next_val = self.state_vals[tuple(next_state)]
+        new_val = curr_val + self.alpha * (next_val - curr_val)
+        self.state_vals[tuple(state)] = new_val

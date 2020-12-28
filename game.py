@@ -169,7 +169,7 @@ class ChungToi:
                                 action_set.append((l, jump_diag, -1))
                     elif l % 2 == 1:
                         # middle of rows, can't jump
-                        neighbors == None
+                        neighbors = None
                         if l == 3 or l == 5:
                             neighbors = [1, 7]
                         else:
@@ -181,6 +181,23 @@ class ChungToi:
                                 action_set.append((l, diag_neighbor, -1))
 
             return action_set
+
+    # non-active next state, primarily used in the simple value agent
+    def next_state(self, state, action):
+        assert action in self.get_action_set(state)
+
+        positions = self.positions
+        orientations = self.orientations
+        prev, dest, o = action
+
+        if prev != None:
+            positions[prev] = 0
+            orientations[prev] = 0
+
+        positions[dest] = self.curr_player
+        orientations[dest] = o
+
+        return positions + orientations
 
     def act(self, state, action):
         assert action in self.get_action_set(state)
@@ -199,10 +216,6 @@ class ChungToi:
         end, winner = self.is_terminal()
         if end:
             if winner == self.curr_player:
-                if self.curr_player == 1:
-                    print('Player ' + str(self.curr_player) + ' won!')
-                else:
-                    print('Other player won!')
                 reward = 1
             else:
                 reward = -1
