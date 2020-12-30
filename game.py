@@ -1,5 +1,6 @@
 from termcolor import colored
 import pyglet
+from itertools import chain, combinations
 # from pyglet import shapes
 
 
@@ -353,3 +354,9 @@ class ChungToi:
 
     #         window.clear()
     #         batch.draw()
+
+
+def powerset(iterable):
+    # powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
+    s = list(iterable)
+    return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
