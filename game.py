@@ -1,6 +1,8 @@
 from termcolor import colored
 import pyglet
-from itertools import chain, combinations
+from itertools import chain, combinations, permutations
+import numpy as np
+import csv
 # from pyglet import shapes
 
 
@@ -360,3 +362,74 @@ def powerset(iterable):
     # powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
     s = list(iterable)
     return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
+
+
+def get_all_pos_keys():
+    key_lst = []
+    pos_lst = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+    ps_set = list(powerset(pos_lst))
+    for i in range(466):
+        subset = ps_set[i]
+        if len(subset) == 6:
+            rows = [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
+            cols = [[0, 3, 6], [1, 4, 7], [2, 5, 8]]
+            # check if two dudes have won
+            if (list(subset[:3]) in rows and list(subset[3:]) in rows) or (list(subset[:3]) in cols and list(subset[3:]) in cols):
+                continue
+
+        perms = list(permutations(subset))
+        # s denotes the colors @ each position, the first ceil(l/2) are 1, the other are 2
+        l = len(subset)
+        for p in perms:
+            pos_key = np.zeros(9, dtype=int)
+            mid = l/2
+            if mid != int(mid):
+                mid = l/2 + 1/2
+            for j in range(l):
+                if j < mid:
+                    pos_key[p[j]] = 1
+                else:
+                    pos_key[p[j]] = -1
+
+            o_list = list(powerset(p))
+            for o in o_list:
+                o_key = np.zeros(9, dtype=int)
+                # this will list the orientations for all the pieces
+                for j in range(l):
+                    if p[j] in o:
+                        o_key[p[j]] = 1
+                    else:
+                        o_key[p[j]] = -1
+
+                key = tuple(pos_key) + tuple(o_key)
+                key_lst.append(key)
+
+    return key_lst
+
+
+def is_terminal(key):
+    for i in range(3):
+        # check rows
+        if key[3 * i] == key[3 * i + 1] and key[3 * i + 1] == key[3 * i + 2] and key[3 * i] != 0:
+            return (True, key[3 * i])
+        elif key[i] == key[i + 3] and key[i+3] == key[i+6] and key[i] != 0:
+            # columns show winner
+            return (True, key[i])
+
+    # diagonal check
+    if key[0] == key[4] and key[4] == key[8] and key[0] != 0:
+        return (True, key[0])
+    elif key[2] == key[4] and key[4] == key[6] and key[2] != 0:
+        return (True, key[2])
+
+    return (False, None)
+
+
+# if __name__ == '__main__':
+#     key_lst = get_all_pos_keys()
+#     print(len(key_lst))
+#     print('finally done')
+#     with open('all_state_keys.csv', 'w') as f:
+#         write = csv.writer(f)
+#         write.writerow(key_lst)
+
