@@ -189,8 +189,8 @@ class ChungToi:
     def next_state(self, state, action):
         assert action in self.get_action_set(state)
 
-        positions = self.positions
-        orientations = self.orientations
+        positions = state[:9]
+        orientations = state[9:]
         prev, dest, o = action
 
         if prev != None:
@@ -370,12 +370,6 @@ def get_all_pos_keys():
     ps_set = list(powerset(pos_lst))
     for i in range(466):
         subset = ps_set[i]
-        if len(subset) == 6:
-            rows = [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
-            cols = [[0, 3, 6], [1, 4, 7], [2, 5, 8]]
-            # check if two dudes have won
-            if (list(subset[:3]) in rows and list(subset[3:]) in rows) or (list(subset[:3]) in cols and list(subset[3:]) in cols):
-                continue
 
         perms = list(permutations(subset))
         # s denotes the colors @ each position, the first ceil(l/2) are 1, the other are 2
@@ -402,8 +396,15 @@ def get_all_pos_keys():
                         o_key[p[j]] = -1
 
                 key = tuple(pos_key) + tuple(o_key)
+                # if len(subset) == 6:
+                #     rows = [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
+                #     cols = [[0, 3, 6], [1, 4, 7], [2, 5, 8]]
+                #     # check if two dudes have won
+                #     if (list(p[:3]) in rows and list(p[3:]) in rows) or (list(p[:3]) in cols and list(p[3:]) in cols):
+                #         continue
+                #     else:
                 key_lst.append(key)
-
+    # key_lst.append((0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
     return key_lst
 
 
@@ -432,4 +433,3 @@ def is_terminal(key):
 #     with open('all_state_keys.csv', 'w') as f:
 #         write = csv.writer(f)
 #         write.writerow(key_lst)
-

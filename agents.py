@@ -99,6 +99,7 @@ class ValueAgent:
     def get_best_action(self, game):
         s = game.get_state()
         action_set = game.get_action_set(s)
+
         next_state_vals = [self.state_vals[tuple(
             game.next_state(s, action))] for action in action_set]
         best_state_val = np.max(next_state_vals)
@@ -110,6 +111,7 @@ class ValueAgent:
     def select_action(self, game):
         s = game.get_state()
         action_set = game.get_action_set(s)
+
         if np.random.uniform() < self.eps:
             # epsilon chance you take the greedy action
             return self.get_best_action(game)
@@ -127,4 +129,3 @@ class ValueAgent:
         w = csv.writer(open(f'{filename}.csv'), 'w')
         for k, v in self.state_vals.items():
             w.writerow([k, v])
-
