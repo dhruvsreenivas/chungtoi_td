@@ -1,14 +1,15 @@
 from game import ChungToi
 from agents import ValueAgent
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def play_game(game, agent, adversary_agent):
     game.reset()
-    print("start game for sure")
+    # print("start game for sure")
     while not game.is_terminal()[0]:
         # player 1 moves first
-        print("player " + str(game.curr_player) + ": will move now")
+        # print("player " + str(game.curr_player) + ": will move now")
         if game.curr_player == 1:
             s = game.get_state()
             agent_a = agent.select_action(game)
@@ -40,13 +41,19 @@ def play_games(num_games, game, agent, adversary_agent):
 
 
 if __name__ == '__main__':
-    NUM_GAMES = 200
+    NUM_GAMES = 300
+    good_state_agent = (0, 1, 0, -1, 1, 0, -1, 0, 0,
+                        0, 1, 0, -1, -1, 0, 1, 0, 0)
     print("1")
     game = ChungToi()
     print("2")
-    agent = ValueAgent(alpha=0.01, player_num=1, eps=0.85)
+    agent = ValueAgent(alpha=0.15, player_num=1, eps=0.85)
+    print(agent.state_vals[good_state_agent])
     print("3")
-    adversary_agent = ValueAgent(alpha=0.01, player_num=-1, eps=0.85)
+    adversary_agent = ValueAgent(alpha=0.15, player_num=-1, eps=0.85)
     print("starting gameplay...")
     p1, p2 = play_games(NUM_GAMES, game, agent, adversary_agent)
     print(p1, p2)
+    vals = list(agent.state_vals.values())
+    found = list(filter(lambda x: 1/2 < x < 1, vals))
+    print(len(found))

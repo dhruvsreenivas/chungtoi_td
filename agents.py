@@ -77,7 +77,7 @@ class ValueAgent:
                 else:
                     self.state_vals[key] = 0
             else:
-                self.state_vals[key] = np.random.random() * 1/2
+                self.state_vals[key] = 1/2
         # have to make sure that the probability of winning from the winning states is 1, losing states is 0, other states is 0.5
         # basically revolves around getting a list of all possible states of the game, and making a dict that assigns the probabilities accordingly
 
@@ -91,7 +91,7 @@ class ValueAgent:
                 else:
                     self.state_vals[key] = 0
             else:
-                self.state_vals[key] = np.random.random() * 1/2
+                self.state_vals[key] = 1/2
 
     def get_value(self, state):
         return self.state_vals[tuple(state)]
