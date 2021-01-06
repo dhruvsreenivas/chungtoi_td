@@ -127,6 +127,9 @@ class ValueAgent:
         self.state_vals[tuple(state)] = new_val
 
     def save_vals(self, filename):
-        w = csv.writer(open(f'{filename}.csv', delimiter=','), 'wb')
+        a_file = open(f'{filename}.csv', 'w')
+        writer = csv.writer(a_file)
         for k, v in self.state_vals.items():
-            w.writerow([k, v])
+            writer.writerow([k, v])
+
+        a_file.close()
