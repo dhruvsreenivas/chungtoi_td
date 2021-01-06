@@ -128,6 +128,6 @@ class ValueAgent:
         self.state_vals[tuple(state)] = new_val
 
     def save_vals(self, filename):
-        df = pd.DataFrame(
-            self.state_vals, columns=np.hstack(['state', 'value']))
+        dictionary = self.state_vals
+        df = pd.DataFrame({'States':list(dictionary.keys()),'Values':list(dictionary.values())})
         df.to_csv(f'{filename}.csv', index=False)
