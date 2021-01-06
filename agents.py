@@ -2,6 +2,7 @@ from collections import defaultdict
 import numpy as np
 from game import is_terminal
 import csv
+import pandas as pd
 
 
 class QLearningAgent:
@@ -127,9 +128,6 @@ class ValueAgent:
         self.state_vals[tuple(state)] = new_val
 
     def save_vals(self, filename):
-        a_file = open(f'{filename}.csv', 'w')
-        writer = csv.writer(a_file)
-        for k, v in self.state_vals.items():
-            writer.writerow([k, v])
-
-        a_file.close()
+        df = pd.DataFrame(
+            self.state_vals, columns=np.hstack(['state', 'value']))
+        df.to_csv(f'{filename}.csv', index=False)
