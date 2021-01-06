@@ -1,6 +1,6 @@
 from collections import defaultdict
 import numpy as np
-from game import get_all_pos_keys, is_terminal
+from game import is_terminal
 import csv
 
 
@@ -62,20 +62,20 @@ class QLearningAgent:
 
 
 class ValueAgent:
-    def __init__(self, alpha, player_num, eps):
+    def __init__(self, alpha, player_num, eps, key_lst=None):
         self.alpha = alpha
         self.player_num = player_num
         self.eps = eps
         # assigns probability of winning from each of those given states
         self.state_vals = {}
+        self.key_lst = key_lst
 
-        key_lst = get_all_pos_keys()
         for key in key_lst:
             if is_terminal(key)[0]:
                 if is_terminal(key)[1] == self.player_num:
-                    self.state_vals[key] = 1
+                    self.state_vals[key] = 1.0
                 else:
-                    self.state_vals[key] = 0
+                    self.state_vals[key] = 0.0
             else:
                 self.state_vals[key] = 1/2
         # have to make sure that the probability of winning from the winning states is 1, losing states is 0, other states is 0.5
@@ -83,13 +83,12 @@ class ValueAgent:
 
     def reset(self):
         self.state_vals = {}
-        key_lst = get_all_pos_keys()
-        for key in key_lst:
+        for key in self.key_lst:
             if is_terminal(key)[0]:
                 if is_terminal(key)[1] == self.player_num:
-                    self.state_vals[key] = 1
+                    self.state_vals[key] = 1.0
                 else:
-                    self.state_vals[key] = 0
+                    self.state_vals[key] = 0.0
             else:
                 self.state_vals[key] = 1/2
 
@@ -122,10 +121,12 @@ class ValueAgent:
         # V(s) <- V(s) + alpha * (V(s') - V(s))
         curr_val = self.state_vals[tuple(state)]
         next_val = self.state_vals[tuple(next_state)]
+        # print('prev state val: ' + str(curr_val))
+        # print('next state val: ' + str(next_val))
         new_val = curr_val + self.alpha * (next_val - curr_val)
         self.state_vals[tuple(state)] = new_val
 
     def save_vals(self, filename):
-        w = csv.writer(open(f'{filename}.csv'), 'w')
+        w = csv.writer(open(f'{filename}.csv', delimiter=','), 'wb')
         for k, v in self.state_vals.items():
             w.writerow([k, v])
