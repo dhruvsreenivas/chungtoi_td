@@ -63,22 +63,21 @@ class QLearningAgent:
 
 
 class ValueAgent:
-    def __init__(self, alpha, player_num, eps, key_lst=None):
+    def __init__(self, alpha, player_num, eps, key_lst=None, value_lst=None):
         self.alpha = alpha
         self.player_num = player_num
         self.eps = eps
         # assigns probability of winning from each of those given states
-        self.state_vals = {}
         self.key_lst = key_lst
-
-        for key in key_lst:
-            if is_terminal(key)[0]:
-                if is_terminal(key)[1] == self.player_num:
-                    self.state_vals[key] = 1.0
-                else:
-                    self.state_vals[key] = 0.0
-            else:
-                self.state_vals[key] = 1/2
+        self.state_vals = {}
+        if value_lst is None:
+            self.reset()
+        else:
+            assert len(self.key_lst) == len(value_lst)
+            for j in range(len(key_lst)):
+                v = value_lst[j]
+                s = key_lst[j]
+                self.state_vals[s] = v
         # have to make sure that the probability of winning from the winning states is 1, losing states is 0, other states is 0.5
         # basically revolves around getting a list of all possible states of the game, and making a dict that assigns the probabilities accordingly
 
@@ -129,5 +128,6 @@ class ValueAgent:
 
     def save_vals(self, filename):
         dictionary = self.state_vals
-        df = pd.DataFrame({'States':list(dictionary.keys()),'Values':list(dictionary.values())})
+        df = pd.DataFrame({'States': list(dictionary.keys()),
+                           'Values': list(dictionary.values())})
         df.to_csv(f'{filename}.csv', index=False)

@@ -66,35 +66,14 @@ if __name__ == '__main__':
     print("starting gameplay...")
 
     # play NUM_GAMES games with player 1 starting
-    # p1, p2, d = play_games(NUM_GAMES, game, agent, adversary_agent, 1)
-    # print(p1, p2, d)
+    p1, p2, d = play_games(NUM_GAMES, game, agent, adversary_agent, 1)
+    print(p1, p2, d)
 
     # then player NUM_GAMES games with player 2 starting
-    # new_p1, new_p2, new_d = play_games(
-    #     NUM_GAMES, game, agent, adversary_agent, -1)
-    # print(new_p1, new_p2, new_d)
-
-    p1 = 0
-    p2 = 0
-    d = 0
-    for _ in range(NUM_GAMES):
-        winner = play_game(game, agent, adversary_agent, 1)
-        if winner == 1:
-            p1 += 1
-        elif winner == -1:
-            p2 += 1
-        else:
-            d += 1
-
-        winner2 = play_game(game, agent, adversary_agent, -1)
-        if winner == 1:
-            p1 += 1
-        elif winner == -1:
-            p2 += 1
-        else:
-            d += 1
-
-    print(p1, p2, d)
+    new_p1, new_p2, new_d = play_games(
+        NUM_GAMES, game, agent, adversary_agent, -1)
+    print(new_p1, new_p2, new_d)
+    print(p1 + new_p1, p2 + new_p2, d + new_d)
 
     vals = list(agent.state_vals.values())
     l = np.unique(vals)

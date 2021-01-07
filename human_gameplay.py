@@ -2,11 +2,12 @@ from agents import ValueAgent
 import numpy as np
 from game import ChungToi
 import pandas as pd
+import ast
 
 
 def human_vs_machine(game, agent):
     # human plays against the MACHINE
-    first = str(input('Do you want to go first? Y/N'))
+    first = str(input('Do you want to go first? Y/N\n'))
     if first == 'Y':
         curr_player = 1
     else:
@@ -19,11 +20,15 @@ def human_vs_machine(game, agent):
                 'Take an action in the game. An action is coded as (prev, next, orientation) where previous is the previous destination of token, next is the next destination, and orientation is the orientation wanted.\n')
             action_tup = tuple(map(str, action_str.split(',')))
             if action_tup[0] == 'None':
-                action = (None, int(action[1]), int(action[2]))
+                action = (None, int(action_tup[1]), int(action_tup[2]))
             else:
-                action = (int(action[0]), int(action[1]), int(action[2]))
+                action = (int(action_tup[0]), int(
+                    action_tup[1]), int(action_tup[2]))
+            print("action set", game.get_action_set(s))
+            print("action", action)
             if action not in game.get_action_set(s):
                 print('You cannot play this action--please choose another one.')
+                curr_player = -1
             else:
                 _, _ = game.act(s, action)
         else:
@@ -31,6 +36,8 @@ def human_vs_machine(game, agent):
             action = agent.select_action(game)
             _, _ = game.act(s, action)
 
+        game.print_game_state()
+        print()
         num_moves += 1
         curr_player *= -1
         if num_moves == 1000:
@@ -40,7 +47,9 @@ def human_vs_machine(game, agent):
 
 if __name__ == '__main__':
     game = ChungToi()
-    keys = pd.read_csv('trained_agent_state_vals.csv')
-    key_lst = keys.to_dict()
-    print(len(key_lst.items()))
-    # agent = ValueAgent(alpha=0, player_num=1, eps=1, key_lst=key_lst)
+    key_df = pd.read_csv('trained_agent_state_vals.csv')
+    key_df['States'] = key_df['States'].map(lambda s: ast.literal_eval(s))
+    agent = ValueAgent(alpha=0, player_num=1, eps=1, key_lst=list(
+        key_df['States']), value_lst=list(key_df['Values']))
+
+    human_vs_machine(game, agent)
